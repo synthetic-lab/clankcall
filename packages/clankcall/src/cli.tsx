@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { render } from "paintcannon-react";
 import { ModelsResponseSpec, type Model } from "./models.js";
-import { ModelsTable } from "./show.js";
+import { ModelsPreview } from "./preview.js";
 
 async function fetchModels(baseUrl: string, apiKey?: string): Promise<Model[]> {
   const url = baseUrl.replace(/\/$/, "") + "/models";
@@ -18,9 +18,9 @@ async function fetchModels(baseUrl: string, apiKey?: string): Promise<Model[]> {
   return validated.data;
 }
 
-async function show(baseUrl: string, apiKey?: string): Promise<void> {
+async function preview(baseUrl: string, apiKey?: string): Promise<void> {
   const models = await fetchModels(baseUrl, apiKey);
-  const app = render(<ModelsTable models={models} />, { alternateScreen: true, captureMouse: true });
+  const app = render(<ModelsPreview models={models} />, { alternateScreen: true, captureMouse: true });
   await app.waitUntilExit();
 }
 
@@ -32,10 +32,10 @@ program
   .version("0.0.0");
 
 program
-  .command("show <base-url>")
+  .command("preview <base-url>")
   .description("Fetch <base-url>/models, validate it, and render a table")
   .option("-k, --api-key <key>", "API key sent as a Bearer token")
-  .action((baseUrl: string, options: { apiKey?: string }) => show(baseUrl, options.apiKey));
+  .action((baseUrl: string, options: { apiKey?: string }) => preview(baseUrl, options.apiKey));
 
 program.parseAsync(process.argv).catch((err: unknown) => {
   console.error(err);

@@ -433,7 +433,7 @@ function ModelDetails({
   );
 }
 
-export function ModelsTable({ models }: { models: Model[] }) {
+export function ModelsPreview({ models }: { models: Model[] }) {
   const app = useApp();
   const terminalWidth = app.paintCannon.terminalSize.cols;
 
