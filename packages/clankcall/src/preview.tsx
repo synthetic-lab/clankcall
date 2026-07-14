@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Div, Input, Span, useApp } from "paintcannon-react";
 import type { DivElement } from "paintcannon";
-import type { Model } from "./models.js";
+import type { Model } from "./models.ts";
 
 // Dim a `#rrggbb` color toward black by `factor` (0 = unchanged, 1 = black).
 function dim(color: string, factor: number): string {

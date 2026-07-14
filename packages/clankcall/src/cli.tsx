@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { render } from "paintcannon-react";
-import { ModelsResponseSpec, type Model } from "./models.js";
-import { ModelsPreview } from "./preview.js";
+import { ModelsResponseSpec, type Model } from "./models.ts";
+import { ModelsPreview } from "./preview.ts";
 
 async function fetchModels(baseUrl: string, apiKey?: string): Promise<Model[]> {
   const url = baseUrl.replace(/\/$/, "") + "/models";
