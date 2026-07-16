@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "commander": "^15.0.0",
+    "json5": "^2.2.3",
     "paintcannon": "^0.0.14",
     "paintcannon-react": "^0.0.14",
     "react": "^19.2.7",
