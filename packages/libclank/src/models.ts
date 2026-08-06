@@ -59,6 +59,13 @@ export const ClankExtSpec = t.subtype({
   reasoning_parameters: t.subtype({
     efforts: t.array(t.str),
   }),
+  // Marks this entry as a rolling-release alias that tracks a permanent model
+  // name, e.g. "fast" -> "omega-9000". Clients can render aliases separately.
+  rollingRelease: t.optional(
+    t.subtype({
+      alias: t.str.comment("The permanent model name this alias tracks"),
+    }),
+  ),
 });
 
 // A single model entry. Only `id` is required; every other spec field is
@@ -73,3 +80,19 @@ export const ModelsResponseSpec = t.subtype({
   data: t.array(ModelSpec),
 });
 export type ModelsResponse = t.GetType<typeof ModelsResponseSpec>;
+
+// A named group of models. Providers can mark one category as recommended to
+// steer clients toward it.
+export const ModelCategorySpec = t.subtype({
+  name: t.str,
+  models: t.array(ModelSpec),
+  recommended: t.optional(t.bool),
+});
+export type ModelCategory = t.GetType<typeof ModelCategorySpec>;
+
+// Alternative top-level response shape: models grouped into categories.
+// Clients should try this first, then fall back to ModelsResponseSpec.
+export const ModelCategoryResponseSpec = t.subtype({
+  categories: t.array(ModelCategorySpec),
+});
+export type ModelCategoryResponse = t.GetType<typeof ModelCategoryResponseSpec>;

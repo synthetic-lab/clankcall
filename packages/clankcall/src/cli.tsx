@@ -1,10 +1,18 @@
 import { Command } from "commander";
 import { render } from "paintcannon-react";
-import { ModelsResponseSpec, ClankfileTypeSpec, type Model } from "libclank";
+import {
+  ModelCategoryResponseSpec,
+  ModelsResponseSpec,
+  ClankfileTypeSpec,
+  type ModelCategory,
+} from "libclank";
 import { ModelsPreview } from "./preview.tsx";
 import { AddProvider, saveProvider } from "./add.tsx";
 
-async function fetchModels(baseUrl: string, apiKey?: string): Promise<Model[]> {
+// Fetch the /models endpoint and normalize to categories: prefer the
+// categorized response shape, falling back to a raw model list wrapped in a
+// single catch-all category.
+async function fetchModels(baseUrl: string, apiKey?: string): Promise<ModelCategory[]> {
   const url = baseUrl.replace(/\/$/, "") + "/models";
   const headers: Record<string, string> = {};
   if (apiKey !== undefined) {
@@ -14,14 +22,17 @@ async function fetchModels(baseUrl: string, apiKey?: string): Promise<Model[]> {
   if (!res.ok) {
     throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
   }
-  const data = await res.json();
+  const data: unknown = await res.json();
+  if (ModelCategoryResponseSpec.guard(data)) {
+    return data.categories;
+  }
   const validated = ModelsResponseSpec.assert(data);
-  return validated.data;
+  return [{ name: "Models", models: validated.data }];
 }
 
 async function preview(baseUrl: string, apiKey?: string): Promise<void> {
-  const models = await fetchModels(baseUrl, apiKey);
-  const app = render(<ModelsPreview models={models} />, { alternateScreen: true, captureMouse: true });
+  const categories = await fetchModels(baseUrl, apiKey);
+  const app = render(<ModelsPreview categories={categories} />, { alternateScreen: true, captureMouse: true });
   await app.waitUntilExit();
 }
 

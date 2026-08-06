@@ -54,6 +54,7 @@ const BASE = {
   prompt: "#38bdf8",
   completion: "#fb923c",
   cacheRead: "#4ade80",
+  alias: "#facc15",
   scrollbarThumb: "#1e293b",
   scrollbarTrack: "#020617",
 } as const;
@@ -75,6 +76,7 @@ export function makePalette(focused: boolean) {
     prompt: dimWhenUnfocused(BASE.prompt),
     completion: dimWhenUnfocused(BASE.completion),
     cacheRead: dimWhenUnfocused(BASE.cacheRead),
+    alias: dimWhenUnfocused(BASE.alias),
     scrollbarThumb: dimWhenUnfocused(BASE.scrollbarThumb),
     scrollbarTrack: dimWhenUnfocused(BASE.scrollbarTrack),
   };

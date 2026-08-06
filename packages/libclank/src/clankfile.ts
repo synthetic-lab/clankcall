@@ -1,5 +1,5 @@
 import { t } from "structural";
-import { ModelSpec } from "./models.ts";
+import { ModelCategorySpec, ModelSpec } from "./models.ts";
 
 /*
  * The supported provider types in Clankfile.json5.
@@ -36,10 +36,23 @@ export type ClankauthEntry = t.GetType<typeof ClankauthEntrySpec>;
 export const ClankauthSpec = t.dict(ClankauthEntrySpec);
 
 /*
+ * Cached /models payload. Endpoints return either categorized or raw model
+ * responses, so the cache stores a discriminated union of the two.
+ */
+export const CachedDataSpec = t.subtype({
+  type: t.value("category"),
+  category: ModelCategorySpec,
+}).or(t.subtype({
+  type: t.value("model"),
+  model: ModelSpec,
+}));
+export type CachedData = t.GetType<typeof CachedDataSpec>;
+
+/*
  * A single entry in Clankcache.json5: a cached /models response.
  */
 export const ClankcacheEntrySpec = t.subtype({
-  cached: ModelSpec,
+  cached: CachedDataSpec,
   lastFetched: t.str,
 });
 export type ClankcacheEntry = t.GetType<typeof ClankcacheEntrySpec>;
