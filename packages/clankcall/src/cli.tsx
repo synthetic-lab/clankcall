@@ -1,9 +1,8 @@
 import { Command } from "commander";
 import { render } from "paintcannon-react";
-import { ModelsResponseSpec, type Model } from "./models.ts";
+import { ModelsResponseSpec, ClankfileTypeSpec, type Model } from "libclank";
 import { ModelsPreview } from "./preview.tsx";
 import { AddProvider, saveProvider } from "./add.tsx";
-import { ClankfileTypeSpec } from "./clankfile.ts";
 
 async function fetchModels(baseUrl: string, apiKey?: string): Promise<Model[]> {
   const url = baseUrl.replace(/\/$/, "") + "/models";

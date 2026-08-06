@@ -8,7 +8,7 @@ import {
   writeClankauth,
   writeClankfile,
 } from "./config.ts";
-import type { ClankfileType } from "./clankfile.ts";
+import type { ClankfileType } from "libclank";
 
 type Step = "baseUrl" | "envVar" | "confirm";
 
@@ -17,7 +17,7 @@ const HINTS: Hint[] = [
   { keys: "ctrl-c", label: "quit" },
 ];
 
-const DEFAULT_BASE_URL = "https://api.synthetic.new/v1";
+const DEFAULT_BASE_URL = "https://api.synthetic.new/openai/v1";
 const DEFAULT_ENV_VAR = "SYNTHETIC_API_KEY";
 
 const STEP_TITLES: Record<Step, string> = {

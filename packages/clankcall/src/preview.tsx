@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Div, Input, Span, useApp } from "paintcannon-react";
 import type { DivElement } from "paintcannon";
-import type { Model } from "./models.ts";
+import type { Model } from "libclank";
 import { makePalette, useFocus, type Palette } from "./theme.ts";
 import { StatusBar, type Hint } from "./status-bar.tsx";
 
@@ -76,7 +76,7 @@ interface DetailRow {
 }
 
 // Flatten a model into ordered key/value pairs, following the field order
-// declared in models.ts. Nested objects use dotted keys; arrays of objects
+// declared in libclank's models.ts. Nested objects use dotted keys; arrays of objects
 // are joined. Every field renders even when absent (as "—"), so it's visible
 // at a glance which fields a provider isn't publishing. Accent colors are
 // resolved from the palette so they dim together with the rest of the UI.

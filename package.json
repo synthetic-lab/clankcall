@@ -2,6 +2,9 @@
   "name": "clankcall",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "build": "npm run build -w libclank && npm run build -w clankcall"
+  },
   "workspaces": [
     "packages/*"
   ]

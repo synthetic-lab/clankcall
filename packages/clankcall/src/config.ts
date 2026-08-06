@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import JSON5 from "json5";
 import { t } from "structural";
-import { ClankfileSpec, ClankauthSpec } from "./clankfile.ts";
+import { ClankfileSpec, ClankauthSpec } from "libclank";
 
 export type Clankfile = t.GetType<typeof ClankfileSpec>;
 export type Clankauth = t.GetType<typeof ClankauthSpec>;

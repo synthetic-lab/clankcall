@@ -8,6 +8,7 @@
   "dependencies": {
     "commander": "^15.0.0",
     "json5": "^2.2.3",
+    "libclank": "*",
     "paintcannon": "^0.0.37",
     "paintcannon-react": "^0.0.37",
     "react": "^19.2.7",
