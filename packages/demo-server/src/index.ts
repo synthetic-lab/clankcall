@@ -138,5 +138,5 @@ const server = createServer((req, res) => {
 
 server.listen(port, () => {
   console.log(`demo-server listening on http://localhost:${port}`);
-  console.log(`smoke test with: clankcall preview http://localhost:${port}`);
+  console.log(`smoke test with: clankcall preview http://localhost:${port}/models`);
 });

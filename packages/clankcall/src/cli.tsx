@@ -9,16 +9,34 @@ import {
 import { ModelsPreview } from "./preview.tsx";
 import { AddProvider, saveProvider } from "./add.tsx";
 
-// Fetch the /models endpoint and normalize to categories: prefer the
+// Pull a human-readable reason out of a fetch failure. Network errors surface
+// as `TypeError: fetch failed` with the real reason (e.g. ECONNREFUSED, one
+// entry per resolved address) nested in `cause`.
+function describeFetchFailure(err: unknown): string {
+  const cause = err instanceof Error ? err.cause : undefined;
+  if (cause instanceof AggregateError) {
+    const reasons = cause.errors.map((e) => (e instanceof Error ? e.message : String(e)));
+    return [...new Set(reasons)].join("; ") || cause.message;
+  }
+  if (cause instanceof Error) return cause.message;
+  if (err instanceof Error) return err.message;
+  return String(err);
+}
+
+// Fetch the given models URL and normalize to categories: prefer the
 // categorized response shape, falling back to a raw model list wrapped in a
 // single catch-all category.
-async function fetchModels(baseUrl: string, apiKey?: string): Promise<ModelCategory[]> {
-  const url = baseUrl.replace(/\/$/, "") + "/models";
+async function fetchModels(url: string, apiKey?: string): Promise<ModelCategory[]> {
   const headers: Record<string, string> = {};
   if (apiKey !== undefined) {
     headers["Authorization"] = `Bearer ${apiKey}`;
   }
-  const res = await fetch(url, { headers });
+  let res: Response;
+  try {
+    res = await fetch(url, { headers });
+  } catch (err) {
+    throw new Error(`Failed to fetch ${url}: ${describeFetchFailure(err)}`);
+  }
   if (!res.ok) {
     throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
   }
@@ -30,8 +48,8 @@ async function fetchModels(baseUrl: string, apiKey?: string): Promise<ModelCateg
   return [{ name: "Models", models: validated.data }];
 }
 
-async function preview(baseUrl: string, apiKey?: string): Promise<void> {
-  const categories = await fetchModels(baseUrl, apiKey);
+async function preview(url: string, apiKey?: string): Promise<void> {
+  const categories = await fetchModels(url, apiKey);
   const app = render(<ModelsPreview categories={categories} />, { alternateScreen: true, captureMouse: true });
   await app.waitUntilExit();
 }
@@ -81,10 +99,10 @@ program
   .version("0.0.0");
 
 program
-  .command("preview <base-url>")
-  .description("Fetch <base-url>/models, validate it, and render a table")
+  .command("preview <url>")
+  .description("Fetch a model listing URL (e.g. https://provider.example/v1/models), validate it, and render a table")
   .option("-k, --api-key <key>", "API key sent as a Bearer token")
-  .action((baseUrl: string, options: { apiKey?: string }) => preview(baseUrl, options.apiKey));
+  .action((url: string, options: { apiKey?: string }) => preview(url, options.apiKey));
 
 program
   .command("add <provider>")
@@ -95,6 +113,8 @@ program
   .action((provider: string, options: AddOptions) => addProvider(provider, options));
 
 program.parseAsync(process.argv).catch((err: unknown) => {
-  console.error(err);
+  // Print just the message: stack traces of expected failures (connection
+  // refused, validation errors) are noise for CLI users.
+  console.error(`error: ${err instanceof Error ? err.message : String(err)}`);
   process.exit(1);
 });
