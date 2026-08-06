@@ -53,6 +53,7 @@ const BASE = {
   detailKey: "#94a3b8",
   prompt: "#38bdf8",
   completion: "#fb923c",
+  cacheRead: "#4ade80",
   scrollbarThumb: "#1e293b",
   scrollbarTrack: "#020617",
 } as const;
@@ -73,6 +74,7 @@ export function makePalette(focused: boolean) {
     detailKey: dimWhenUnfocused(BASE.detailKey),
     prompt: dimWhenUnfocused(BASE.prompt),
     completion: dimWhenUnfocused(BASE.completion),
+    cacheRead: dimWhenUnfocused(BASE.cacheRead),
     scrollbarThumb: dimWhenUnfocused(BASE.scrollbarThumb),
     scrollbarTrack: dimWhenUnfocused(BASE.scrollbarTrack),
   };

@@ -2,13 +2,16 @@
   "name": "clankcall",
   "version": "0.0.0",
   "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "commander": "^15.0.0",
     "json5": "^2.2.3",
-    "paintcannon": "^0.0.14",
-    "paintcannon-react": "^0.0.14",
+    "paintcannon": "^0.0.37",
+    "paintcannon-react": "^0.0.37",
     "react": "^19.2.7",
-    "structural": "^0.0.29"
+    "structural": "^0.0.36"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

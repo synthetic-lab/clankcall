@@ -7,7 +7,7 @@ export const PricingSpec = t.subtype({
   completion: t.str.comment("Pricing per 1 token"),
   image: t.optional(t.str.comment("Pricing per 1 image")),
   request: t.optional(t.str.comment("Pricing per 1 request")),
-  input_cache_read: t.optional(t.str.comment("Pricing per 1 token")),
+  input_cache_reads: t.optional(t.str.comment("Pricing per 1 token")),
 });
 export type Pricing = t.GetType<typeof PricingSpec>;
 
@@ -54,9 +54,18 @@ export const OpenRouterSpec = t.subtype({
   datacenters: t.optional(t.array(DatacenterSpec)),
 });
 
+// Extensions to OR spec for useful fields for agent harnesses
+export const ClankExtSpec = t.subtype({
+  reasoning_parameters: t.subtype({
+    efforts: t.array(t.str),
+  }),
+});
+
 // A single model entry. Only `id` is required; every other spec field is
 // optional, since real providers commonly publish little beyond the id.
-export const ModelSpec = t.partial(OpenRouterSpec).and(t.subtype({ id: t.str }));
+export const ModelSpec = t.partial(OpenRouterSpec)
+  .and(t.partial(ClankExtSpec))
+  .and(t.subtype({ id: t.str }));
 export type Model = t.GetType<typeof ModelSpec>;
 
 // Top-level response shape of the OpenRouter models endpoint.

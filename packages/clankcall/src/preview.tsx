@@ -77,10 +77,11 @@ interface DetailRow {
 
 // Flatten a model into ordered key/value pairs, following the field order
 // declared in models.ts. Nested objects use dotted keys; arrays of objects
-// are indexed. Optional fields are only included when present. Accent colors
-// are resolved from the palette so they dim together with the rest of the UI.
+// are joined. Every field renders even when absent (as "—"), so it's visible
+// at a glance which fields a provider isn't publishing. Accent colors are
+// resolved from the palette so they dim together with the rest of the UI.
 function modelDetails(model: Model, palette: Palette): DetailRow[] {
-  const rows: DetailRow[] = [
+  return [
     { key: "id", value: model.id },
     { key: "name", value: model.name ?? "—" },
     { key: "created", value: model.created !== undefined ? String(model.created) : "—" },
@@ -90,52 +91,24 @@ function modelDetails(model: Model, palette: Palette): DetailRow[] {
     { key: "max_output_length", value: formatContext(model.max_output_length) },
     { key: "pricing.prompt", value: formatPrice(model.pricing?.prompt), color: palette.prompt },
     { key: "pricing.completion", value: formatPrice(model.pricing?.completion), color: palette.completion },
-  ];
-  if (model.pricing !== undefined) {
-    if (model.pricing.image !== undefined) {
-      rows.push({ key: "pricing.image", value: formatPrice(model.pricing.image) });
-    }
-    if (model.pricing.request !== undefined) {
-      rows.push({ key: "pricing.request", value: formatPrice(model.pricing.request) });
-    }
-    if (model.pricing.input_cache_read !== undefined) {
-      rows.push({ key: "pricing.input_cache_read", value: formatPrice(model.pricing.input_cache_read) });
-    }
-  }
-  rows.push(
+    { key: "pricing.image", value: formatPrice(model.pricing?.image) },
+    { key: "pricing.request", value: formatPrice(model.pricing?.request) },
+    { key: "pricing.input_cache_reads", value: formatPrice(model.pricing?.input_cache_reads), color: palette.cacheRead },
     { key: "supported_sampling_parameters", value: model.supported_sampling_parameters?.join(", ") ?? "—" },
     { key: "supported_features", value: model.supported_features?.join(", ") ?? "—" },
-  );
-  if (model.hugging_face_id !== undefined) {
-    rows.push({ key: "hugging_face_id", value: model.hugging_face_id });
-  }
-  if (model.quantization !== undefined) {
-    rows.push({ key: "quantization", value: model.quantization });
-  }
-  if (model.description !== undefined) {
-    rows.push({ key: "description", value: model.description });
-  }
-  if (model.deprecation_date !== undefined) {
-    rows.push({ key: "deprecation_date", value: model.deprecation_date });
-  }
-  if (model.is_ready !== undefined) {
-    rows.push({ key: "is_ready", value: String(model.is_ready) });
-  }
-  if (model.discount_to_user !== undefined) {
-    rows.push({ key: "discount_to_user", value: String(model.discount_to_user) });
-  }
-  if (model.openrouter !== undefined) {
-    rows.push({ key: "openrouter.slug", value: model.openrouter.slug });
-  }
-  if (model.datacenters !== undefined) {
-    model.datacenters.forEach((dc, i) => {
-      rows.push({ key: `datacenters[${i}].country_code`, value: dc.country_code });
-    });
-  }
-  return rows;
+    { key: "hugging_face_id", value: model.hugging_face_id ?? "—" },
+    { key: "quantization", value: model.quantization ?? "—" },
+    { key: "description", value: model.description ?? "—" },
+    { key: "deprecation_date", value: model.deprecation_date ?? "—" },
+    { key: "is_ready", value: model.is_ready !== undefined ? String(model.is_ready) : "—" },
+    { key: "discount_to_user", value: model.discount_to_user !== undefined ? String(model.discount_to_user) : "—" },
+    { key: "openrouter.slug", value: model.openrouter?.slug ?? "—" },
+    { key: "datacenters", value: model.datacenters?.map((dc) => dc.country_code).join(", ") ?? "—" },
+    { key: "reasoning_parameters.efforts", value: model.reasoning_parameters?.efforts.join(", ") ?? "—" },
+  ];
 }
 
-const HEADERS = ["Name", "Context", "Prompt", "Completion"];
+const HEADERS = ["Name", "Context", "Cache Reads", "Prompt", "Completion"];
 const GAP = 2;
 
 const LIST_HINTS: Hint[] = [
@@ -180,8 +153,8 @@ function ModelRow({
   palette: Palette;
 }) {
   // Per-column text color; indexed to match the column order in HEADERS. The
-  // Prompt/Completion accents come from the palette so they dim when unfocused.
-  const columnColors = [undefined, undefined, palette.prompt, palette.completion];
+  // pricing accents come from the palette so they dim when unfocused.
+  const columnColors = [undefined, undefined, palette.cacheRead, palette.prompt, palette.completion];
   return (
     <Div
       style={{
@@ -367,23 +340,25 @@ export function ModelsPreview({ models }: { models: Model[] }) {
   }
 
   const nameHeader = anyMissingName ? "ID" : "Name";
-  const headers = [nameHeader, HEADERS[1], HEADERS[2], HEADERS[3]];
+  const headers = [nameHeader, HEADERS[1], HEADERS[2], HEADERS[3], HEADERS[4]];
 
   const columns = [
     filtered.map((m) => (anyMissingName ? m.id : m.name ?? m.id)),
     filtered.map((m) => formatContext(m.context_length)),
+    filtered.map((m) => formatPrice(m.pricing?.input_cache_reads)),
     filtered.map((m) => formatPrice(m.pricing?.prompt)),
     filtered.map((m) => formatPrice(m.pricing?.completion)),
   ];
 
   const contextWidth = columnWidth(headers[1], columns[1]);
-  const promptWidth = columnWidth(headers[2], columns[2]);
-  const completionWidth = columnWidth(headers[3], columns[3]);
-  const fixedWidth = contextWidth + promptWidth + completionWidth;
+  const cacheReadWidth = columnWidth(headers[2], columns[2]);
+  const promptWidth = columnWidth(headers[3], columns[3]);
+  const completionWidth = columnWidth(headers[4], columns[4]);
+  const fixedWidth = contextWidth + cacheReadWidth + promptWidth + completionWidth;
   const gapWidth = GAP * (HEADERS.length - 1);
   const nameDesired = columnWidth(nameHeader, columns[0]);
   const nameWidth = Math.min(nameDesired, Math.max(0, terminalWidth - fixedWidth - gapWidth));
-  const widths = [nameWidth, contextWidth, promptWidth, completionWidth];
+  const widths = [nameWidth, contextWidth, cacheReadWidth, promptWidth, completionWidth];
 
   function onKeyDown(event: { key: string; preventDefault: () => void }) {
     if (event.key === "Enter") {
@@ -456,7 +431,7 @@ export function ModelsPreview({ models }: { models: Model[] }) {
         >
           {headers.map((header, i) => {
             const isLast = i === headers.length - 1;
-            const columnColors = [undefined, undefined, palette.prompt, palette.completion];
+            const columnColors = [undefined, undefined, palette.cacheRead, palette.prompt, palette.completion];
             return (
               <Span key={header} style={cellStyle(widths[i] + (isLast ? 0 : GAP), columnColors[i], true)}>
                 {cellText(header, widths[i], isLast)}
